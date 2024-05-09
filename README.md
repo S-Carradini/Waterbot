@@ -62,11 +62,11 @@ The pre-processed data is then used to train the machine learning model. The mac
 
 After the model is trained, it needs to be tested to ensure that it is providing accurate responses to user queries. Testing involves providing the model with a set of questions and evaluating its responses. The testing process should include both automated and manual testing to ensure that the chatbot is accurately responding to user queries.
 
-## Integration
+### Integration
 
 Once the model is tested and proven to be accurate, it can be integrated into a chatbot platform. The chatbot platform should be designed to handle user queries related to water in Arizona and provide accurate responses based on the machine learning model. The chatbot platform can be developed using a variety of programming languages like Python, Ruby, or Node.js.
 
-## Recommendations
+### Recommendations
 
 The following steps are recommended to ensure that the chatbot is effective and accurate:   
 
