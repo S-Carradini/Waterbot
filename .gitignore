@@ -1,0 +1,14 @@
+.vscode/launch.json
+.vscode/settings.json
+chat_history.txt
+get-pip.py
+docs/chroma/338e3404-20f9-473c-9ad2-068940de0f54/length.bin
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sample stream</title>
+    <style>
+        #response-container {
+            white-space: pre-wrap; /* Preserve line breaks and wrap text */
+            font-size: 18px;
+            overflow-y: auto; /* Add this line for vertical scrollbar */
+            border: 1px solid #ccc; /* Add a border for clarity */
+            width: 1000 px;
+            height: 300px; /* Add height to the response container */
+            padding: 10px; /* Add padding for better styling */
+        }
+
+        .input-group {
+            margin-bottom: 10px; /* Add some margin to the input group */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ask Blue:</h1>
+
+    <form onsubmit="return false" id="userBox">
+        <div class="input-group mt-3">
+            <input type="text" id="user_query" name="user_query" class="input-chatbot-question form-control"
+                placeholder="Type your question here" aria-label="Type your question here"
+                aria-describedby="basic-addon2" style="border-style: solid;">
+            <div class="input-group-append">
+                <button class="btn btn-submit" id="start-stream" type="button">Submit</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="response-container"></div>
+
+    <script>
+        // Event listener for the "Start Streaming" button
+        document.getElementById('start-stream').addEventListener('click', function () {
+            const userQuery = document.getElementById('user_query').value;
+            const respContainer = document.getElementById('response-container');
+
+            // Create an EventSource to listen for events from the server
+            const eventSource = new EventSource(`/chat_stream_api?user_query=${encodeURIComponent(userQuery)}`);
+
+            eventSource.onmessage = (event) => {
+                // Handle incoming events here
+                if (event.data == 'end_of_stream_waterbot_blue') {
+                    eventSource.close();
+                    respContainer.innerHTML += `<span>done </span>`;
+                    respContainer.innerHTML += `<br>`;
+                    respContainer.innerHTML += `<span class="response-line"></span>`;
+                    respContainer.innerHTML += `<label for="rating">Rate from 1-6:</label>
+                                               <input type="number" id="rating" name="rating" min="1" max="6">
+                                               <button onclick="submitRating()">Submit Rating</button>`;
+                    respContainer.innerHTML += `<br>`;
+                } else {
+                    // Check if a new line is needed based on the width
+                    if (respContainer.scrollWidth > respContainer.clientWidth) {
+                        respContainer.innerHTML += '<br>';
+                    }
+                    respContainer.innerHTML += `<span>${event.data}</span>`;
+                }
+                // Scroll to the bottom to show the latest message
+                respContainer.scrollTop = respContainer.scrollHeight;
+            };
+        });
+        function submitRating() {
+        // Get the rating value from the input
+        const rating = document.getElementById('rating').value;
+
+        // You can send the rating to the server using fetch or any other method
+        // For example, you can use the fetch API to make a POST request to your server
+        const apiUrl = '/submit_rating_api'; // Replace with the actual URL if needed
+
+        // Create a request body with the rating value
+        const requestBody = new FormData();
+        requestBody.append('rating', rating);
+
+        // Make a POST request to submit the rating
+        fetch(apiUrl, {
+            method: 'POST',
+            body: requestBody,
+        })
+        .then(response => response.text())
+        .then(result => {
+            // Handle the result if needed
+            console.log(result);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    </script>
+</body>
+
+</html>
