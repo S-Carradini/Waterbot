@@ -118,6 +118,9 @@ def chat_api():
    
     docs = vectordb.similarity_search(user_query)
     print('docs\n', docs)
+    sources = []
+    qdocs1 = []
+
     for i in range(len(docs)):
         sources = [str(docs[i].metadata['source'])]
         qdocs1 = [" ".join(docs[i].page_content)]
@@ -130,6 +133,9 @@ def chat_api():
             source_list.append(websource)
     system_message = {"role":"system", "content": f"You are a helpful assistant named Blue that provides information about water in Arizona.\
 You will be provided with Arizona water related queries. Answer the queries briefly in 3 to 4 sentences.\
+The governor of Arizona is Katie Hobbs.\
+When asked the name of the governor or current governor you should respond with the name Katie Hobbs.\
+For any other inquiries regarding the names of elected officials excluding the name of the governor, you should respond: 'The most current information on the names of elected officials is available at az.gov.'\
 Verify not to include any information that is irrelevant to the current query. Use the following information to \
 answer the queries in a friendly tone {qdocs1}"}
     messages = [system_message]
@@ -167,6 +173,8 @@ def chat_descripiton():
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
     docs = vectordb.similarity_search(search_query)
+    sources = []
+    qdocs1 = []
     # docs = vectordb.similarity_search(user_query)
     for i in range(len(docs)):
         sources = [str(docs[i].metadata['source'])]
@@ -283,6 +291,8 @@ def chat_actionItems():
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
     docs = vectordb.similarity_search(search_query)
+    sources = []
+    qdocs1 = []
     for i in range(len(docs)):
         sources = [str(docs[i].metadata['source'])]
         qdocs1 = [" ".join(docs[i].page_content)]
