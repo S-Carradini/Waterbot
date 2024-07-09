@@ -140,7 +140,6 @@ Verify not to include any information that is irrelevant to the current query. U
 answer the queries in a friendly tone {qdocs1}"}
     messages = [system_message]
 
-
     history = memory.get_history(session['uuid'])
     for message in history:
         messages.append(message)
@@ -246,6 +245,8 @@ def chat_detailed():
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
     docs = vectordb.similarity_search(search_query)
+    sources = []
+    qdocs1 = []
     for i in range(len(docs)):
         sources = [str(docs[i].metadata['source'])]
         qdocs1 = [" ".join(docs[i].page_content)]
