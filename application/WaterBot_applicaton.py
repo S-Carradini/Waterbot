@@ -17,6 +17,7 @@ from uuid import uuid4
 from openai import OpenAI
 from chatbot_memory import ChatbotMemory
 from source_metadata import LookupWebsource
+from langdetect import detect, DetectorFactory
 
 # Initializing Flask app
 app = Flask(__name__, template_folder='templates')
@@ -41,6 +42,17 @@ message_count = dict()
 # Initializing embeddings and vector store
 embeddings = OpenAIEmbeddings()
 vectordb = Chroma(persist_directory="docs_new/chroma/", embedding_function=embeddings)
+vectordb_spanish = Chroma(persist_directory="docs_new/chroma/spanish", embedding_function=embeddings)
+
+# Ensure reproducibility by setting the seed
+DetectorFactory.seed = 0
+
+def detect_language(text):
+    try:
+        language = detect(text)
+        return language
+    except Exception as e:
+        return None
 
 # Route to serve static files from templates folder
 @app.route('/templates/<path:path>')
@@ -62,10 +74,24 @@ def send_style_css():
 def send_js():
     return send_from_directory('templates', 'utils.js')
 
+@app.route('/spanish_utils.js')
+def send_js_spanish():
+    return send_from_directory('templates', 'spanish_utils.js')
+
 # Route for the home page
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route("/Spanish_Translation_2.0.1.html")
+def spanish_home():
+    # Context data to pass to the template
+    context = {
+        "utils_js": "utils_spanish.js"  # Specify the JS file for spanish.html
+    }
+
+    # Render the HTML template with the context
+    return render_template("spanish.html", **context)
 
 # Route to handle submission of ratings
 @app.route('/submit_rating_api', methods=['POST'])
@@ -115,8 +141,13 @@ def chat_api():
         response = 'I am sorry, your request cannot be handled.'
         msgID = memory.add_message_to_session(session['uuid'],user_query, response)
         return jsonify({"resp":response, "msgID": msgID})
-   
-    docs = vectordb.similarity_search(user_query)
+    language = detect_language(user_query)
+    
+    if language == 'es':
+        docs = vectordb_spanish.similarity_search(user_query)
+    else:
+        docs = vectordb.similarity_search(user_query)
+    
     print('docs\n', docs)
     sources = []
     qdocs1 = []
@@ -136,6 +167,8 @@ You will be provided with Arizona water related queries. Answer the queries brie
 The governor of Arizona is Katie Hobbs.\
 When asked the name of the governor or current governor you should respond with the name Katie Hobbs.\
 For any other inquiries regarding the names of elected officials excluding the name of the governor, you should respond: 'The most current information on the names of elected officials is available at az.gov.'\
+AWII stands for Arizona Water Innovation Initiative.\
+When asked to define AWII or What is AWII or What it stands for, respond with: AWII stands for Arizona Water Innovation Initiative.\
 Verify not to include any information that is irrelevant to the current query. Use the following information to \
 answer the queries in a friendly tone {qdocs1}"}
     messages = [system_message]
@@ -171,7 +204,13 @@ def chat_descripiton():
     user_query = previous_query_response[0]['content']
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
-    docs = vectordb.similarity_search(search_query)
+    language = detect_language(user_query)
+    
+    if language == 'es':
+        docs = vectordb_spanish.similarity_search(search_query)
+    else:
+        docs = vectordb.similarity_search(search_query)
+        
     sources = []
     qdocs1 = []
     # docs = vectordb.similarity_search(user_query)
@@ -244,7 +283,13 @@ def chat_detailed():
     user_query = previous_query_response[0]['content']
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
-    docs = vectordb.similarity_search(search_query)
+    language = detect_language(user_query)
+    
+    if language == 'es':
+        docs = vectordb_spanish.similarity_search(search_query)
+    else:
+        docs = vectordb.similarity_search(search_query)
+        
     sources = []
     qdocs1 = []
     for i in range(len(docs)):
@@ -291,7 +336,14 @@ def chat_actionItems():
     user_query = previous_query_response[0]['content']
     previous_response = previous_query_response[1]['content']
     search_query = user_query+previous_response
-    docs = vectordb.similarity_search(search_query)
+    
+    language = detect_language(user_query)
+    
+    if language == 'es':
+        docs = vectordb_spanish.similarity_search(search_query)
+    else:
+        docs = vectordb.similarity_search(search_query)
+         
     sources = []
     qdocs1 = []
     for i in range(len(docs)):
